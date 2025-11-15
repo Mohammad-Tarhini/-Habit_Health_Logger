@@ -1,8 +1,7 @@
 <?php
-require_once(__DIR__ . "/../models/Car.php");
-require_once(__DIR__ . "/../connection/connection.php");
-require_once(__DIR__ . "/../services/ResponseService.php");
-require_once(__DIR__."/../services/AuthoService.php");
+require_once __DIR__ . '/../services/AuthoService.php';
+require_once __DIR__ . '/../models/User.php';
+
 
 
 class AuthoController{
@@ -50,9 +49,9 @@ class AuthoController{
 
         $signInResult=AuthoService::signIn($email,$password,$connection);
         if(is_int($signInResult)){
-            echo ResponseService::success("userId"=>$signInResult);
+            echo ResponseService::success("$signInResult");
         }else{
-            echo ResponseService::success(signInResult,409);
+            echo ResponseService::error($signInResult,409);
         }
 
     }

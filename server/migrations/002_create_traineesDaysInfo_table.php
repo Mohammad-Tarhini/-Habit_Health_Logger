@@ -6,14 +6,11 @@ $sql="CREATE TABLE trainees_days_info (
     user_id INT NOT NULL,
     walk_minutes INT DEFAULT 0,
     steps INT DEFAULT 0,
-    sleep_hours time,      -- allows 7.5 hours etc
-    wakeup_hour TIME,
+    sleep_hour flaot,      -- allows 7.5 hours etc
     caffeine INT DEFAULT 0,         -- cups
     calories_intake INT DEFAULT 0,  -- calories consumed
     calories_burn INT DEFAULT 0,    -- calories burned
-    log_date DATE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    date DATE NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );"
 $query = $connection->prepare($sql);

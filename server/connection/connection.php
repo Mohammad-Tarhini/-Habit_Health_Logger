@@ -6,8 +6,8 @@ header("Content-Type: application/json; charset=UTF-8");
 
 $connection=new mysqli("localhost","root","","health_logger_db");
 
-if($connection ->connection_error){
-    die("connection error" . $connection-> connection_error)
+if($connection ->connect_error){
+    die("connection error" . $connection-> connect_error);
 }
 
 

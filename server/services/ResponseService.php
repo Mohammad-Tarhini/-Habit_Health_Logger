@@ -1,5 +1,7 @@
 <?php
-
+// require_once __DIR__ . '../controllers/AdminController.php';
+// require_once __DIR__ . '../controllers/AuthoController.php';
+// require_once __DIR__ . '../controllers/TraineeController.php';
 class ResponseService {
     public static function success($payload, int $status_code = 200) {
         return json_encode([

@@ -1,6 +1,6 @@
 <?php
-require_once("../Controller/AuthoController.php");
-require_once("../models/User.php");
+require_once __DIR__ . '/../controllers/AuthoController.php';
+require_once __DIR__ . '/../models/User.php';
 
 
 

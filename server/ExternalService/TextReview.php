@@ -1,97 +1,204 @@
 <?php
-include_once __DIR__."/callOpenAI.php";
+require_once __DIR__ . "/callOpenAI.php";
 
-function validateStructure($response) {
-    /*
-        we expect this output from the AI: 
-        
-        {"exercise_minutes":"20","walk_minutes":"20","steps":"23","sleep_hour":"22:33:2","wakeup_hour":"43324","caffeine":4,"calories_burn":5,"calories_intake":43,"calories_burn":39,"start_date":"32","end_date":"3/4/2000"}
-           
-        
-        In this function it should be decoded into an associtive array
-    */
-    
-    if($response == null){
-        return "Response not parsable to JSON";
-    }
-
-    // must be an array/object 
-    if (is_object($response)) {
-        return "Response is not an object ";
-    }
-    // allow no error cases 
-    if (empty($response)) {
-        return null; // valid case
-    }
-
-    
-
-       /* // check required fields
-        if (!isset($item['severity'], $item['issue'], $item['suggestion'])) {
-            return "Missing required fields in item at index $index , remember each item must contain severity , issue and suggestion fields";
-        }*/
-
-
-        // type checks
-        if (!is_string($item['issue']) || !is_string($item['suggestion'])) {
-            return "Issue or suggestion is not a string in item at index $index";
+class TextReview
+{
+    // -------------------------------
+    // Validate the AI returned array
+    // -------------------------------
+    public static function validateStructure($response)
+    {
+        if ($response === null) {
+            return "Response not parsable to JSON";
         }
-    
 
-    return null;// no errors
-}
-function reviewText($text , $retry = 0 , $error = null , $previousResponse = null){
-    // to avoid infinite recursion
-    if($retry > 4) return ["error" => "Failed to receive correct structure from AI"];
-    // generate instruction
-    if($retry == 0){// if on first try, give initial prompt
-        $instruction = <<<EOD
-        You are strictly a . I'm going to give you a Text snippet. 
-        Read it carefully, data , and return an array of JSON object(s) with these exact fields:
-        exercise_minutes	walk_minutes	steps	sleep_hour	wakeup_hour	caffeine	calories_intake	calories_burn	start_date	end_date
-        
-        Constraints:
-       
+        if (!is_array($response)) {
+            return "Response must be a JSON object or array";
+        }
 
-        Text:
-        $code
-        Return only the array of JSON object(s), with no explanation or formatting.
-        EOD;
-    }else{// modify the instruction guiding the AI to the right output
-        $instruction = <<<EOD
-        I previously asked you to review my Text and find object in it, then return 
-        an JSON object with these exact fields:
-        exercise_minutes	walk_minutes	steps	sleep_hour	wakeup_hour	caffeine	calories_intake	calories_burn	start_date	end_date
+        // Empty response is allowed
+        if (empty($response)) {
+            return null;
+        }
 
-        
+        // If the AI returned multiple objects, validate each one
+        // foreach ($response as $item) {
 
-        Code :
-        $code
-        Only return the array of JSON object(s), with no explanation or formatting.
+        //     if (!is_array($item)) {
+        //         return "Each returned element must be an associative array";
+        //     }
 
-        But you faild to deliver the right struture.
-        Your response was :
-        $previousResponse
-        The mistake you did was : 
-        $error
-        Please take your time.
-        EOD;
+        //     // No strict required fields → skip
+        // }
+
+        return null; // all good
     }
 
-    // call api
-    $response = requestOpenAi($instruction);
-    $responseData = json_decode($response , true);
-    
-    $content = $responseData['choices'][0]['message']['content'];
-    $parsedContent = json_decode($content , true);
 
-    // validate response
-    $error = validateStructure($parsedContent);
-    if($error != null){
-        $previousEncodedResponse = json_encode($parsedContent , JSON_UNESCAPED_UNICODE);// return to json so AI can see response clearly
-        return reviewCode($code , $fileExtension, $retry + 1 , $error , $previousEncodedResponse);
-    }else{// success
-        return $parsedContent;         
+
+    // ----------------------------------
+    // Extract GENERAL DATA from text
+    // ----------------------------------
+    public static function reviewTextGenenal($text, $retry = 0, $error = null, $previousResponse = null)
+    {
+        if ($retry > 4) {
+            return ["error" => "Failed to get a valid structure from AI"];
+        }
+
+        if ($retry === 0) {
+            $instruction = <<<EOD
+Extract health-related information from the following text.
+
+Return ONLY a JSON OBJECT or ARRAY containing the following fields 
+(omit fields that do not exist in the text):
+
+- exercise_minutes
+- walk_minutes
+- steps
+- sleep_hour
+- wakeup_hour
+- caffeine
+- calories_intake  (estimate if possible)
+- calories_burn    (estimate if possible)
+
+Text:
+$text
+
+Return ONLY JSON. No explanations. No text.
+EOD;
+        } else {
+            $instruction = <<<EOD
+Your previous response was invalid JSON.
+
+Error: $error
+
+Previous response:
+$previousResponse
+
+Try again.
+
+Extract and return ONLY these fields (omit missing ones):
+
+- exercise_minutes
+- walk_minutes
+- steps
+- sleep_hour
+- caffeine
+- calories_intake
+- calories_burn
+
+Text:
+$text
+
+Return ONLY JSON.
+EOD;
+        }
+
+        // Call AI
+        $response = requestOpenAi($instruction);
+        $responseDecoded = json_decode($response, true);
+
+        if (!isset($responseDecoded['choices'][0]['message']['content'])) {
+            return ["error" => "Invalid OpenAI response"];
+        }
+
+        $content = $responseDecoded['choices'][0]['message']['content'];
+        $parsed = json_decode($content, true);
+
+        // Validate result
+        $validationError = self::validateStructure($parsed);
+
+        if ($validationError !== null) {
+            return self::reviewTextGenenal(
+                $text,
+                $retry + 1,
+                $validationError,
+                $content
+            );
+        }
+
+        return $parsed;
     }
+
+
+
+
+    // ----------------------------------
+    // Extract MEAL DATA from text
+    // ----------------------------------
+    public static function reviewTextforMeals($text, $retry = 0, $error = null, $previousResponse = null)
+    {
+        if ($retry > 4) {
+            return ["error" => "Failed to get a valid meals structure from AI"];
+        }
+
+        if ($retry === 0) {
+            $instruction = <<<EOD
+Extract MEAL information from the text.
+
+Return ONLY a JSON OBJECT or ARRAY with these fields:
+
+- meals
+- datetime
+- meal_categories
+- calories_intake  (estimate)
+
+Text:
+$text
+
+Return ONLY JSON. No explanations.
+EOD;
+        } else {
+            $instruction = <<<EOD
+Your previous meal extraction was invalid.
+
+Error: $error
+
+Previous response:
+$previousResponse
+
+Try again.
+
+Extract ONLY the following fields:
+
+- meals
+- datetime
+- meal_categories
+- calories_intake
+
+Text:
+$text
+
+Return ONLY JSON. No explanations.
+EOD;
+        }
+
+        // Call AI
+        $response = requestOpenAi($instruction);
+        $responseDecoded = json_decode($response, true);
+
+        if (!isset($responseDecoded['choices'][0]['message']['content'])) {
+            return ["error" => "Invalid OpenAI response"];
+        }
+
+        $content = $responseDecoded['choices'][0]['message']['content'];
+        $parsed = json_decode($content, true);
+
+        // Validate
+        $validationError = self::validateStructure($parsed);
+
+        if ($validationError !== null) {
+            return self::reviewTextforMeals(
+                $text,
+                $retry + 1,
+                $validationError,
+                $content
+            );
+        }
+
+        return $parsed;
+    }
+
+    
 }
 ?>

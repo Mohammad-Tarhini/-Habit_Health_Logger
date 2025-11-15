@@ -18,12 +18,34 @@ abstract class Model{
 
         return $data ? new static($data) : null;
     }
-    public static function findByColumn(mysqli $connection, string $columnName, string $value): ?array
+    public static function findAll(mysqli $connection) {
+    $sql = sprintf("SELECT * FROM %s", static::$table);
+    $query = $connection->prepare($sql);
+
+    if (!$query->execute()) {
+        return null; // early return if execution fails
+    }
+
+    $result = $query->get_result();
+    $allData = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $allData[] = $row;
+    }
+
+    if (empty($allData)) {
+        return null; // return null if no rows
+    }
+
+    $Objects = [];
+    foreach ($allData as $Data) {
+        $Objects[] = new static($Data);
+    }
+    return $Objects;
+    }
+    public static function findByColumn(mysqli $connection, string $columnName, string $value)
     {
-        $allowedColumns = ['id', 'email', 'name']; 
-        if (!in_array($columnName, $allowedColumns)) {
-            throw new InvalidArgumentException("Invalid column name: $columnName");
-        }
+        
     
         $sql = sprintf("SELECT * FROM %s WHERE %s = ?", static::$table, $columnName);
     
@@ -124,6 +146,71 @@ abstract class Model{
 
     return $query->execute();
   }
+
+  public static function findByDateRange(mysqli $connection, string $columnName, string $startDate, string $endDate, ?int $userId = null)
+    {
+        $sql = sprintf("SELECT * FROM %s WHERE %s BETWEEN ? AND ?", static::$table, $columnName);
+    
+        $types = "ss";
+        $params = [$startDate, $endDate];
+    
+        if ($userId !== null) {
+            $sql .= " AND user_id = ?";
+            $types .= "i";
+            $params[] = $userId;
+        }
+    
+        $stmt = $connection->prepare($sql);
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+    
+        $result = $stmt->get_result();
+        $allData = [];
+    
+        while ($row = $result->fetch_assoc()) {
+            $allData[] = new static($row);
+        }
+    
+        $stmt->close();
+    
+        return empty($allData) ? null : $allData;
+    }
+
+public static function findAllWhere(mysqli $connection, array $conditions)
+{
+    $table = static::$table;
+
+    // Build WHERE clause
+    $clauses = [];
+    $types = "";
+    $values = [];
+
+    foreach ($conditions as $column => $value) {
+        $clauses[] = "$column = ?";
+        $types .= is_int($value) ? "i" : "s";
+        $values[] = $value;
+    }
+
+    $where = implode(" AND ", $clauses);
+
+    $sql = "SELECT * FROM $table WHERE $where";
+
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param($types, ...$values);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+    $objects = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $objects[] = new static($row);
+    }
+
+    return !empty($objects) ? $objects : null;
+}
+
+
 
     
     
