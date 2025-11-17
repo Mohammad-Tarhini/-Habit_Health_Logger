@@ -12,7 +12,7 @@ const traineeId = localStorage.getItem("userId");
 
 const TraineeAPI = {
     sendText: (params) => axios.get(BASE_URL + "trainee/entriesAndHabits", { params }),
-    addHabit: (data) => axios.post(BASE_URL + "trainee/AddHabitsManual", data),
+    addHabit: ( data) => axios.post(BASE_URL + "trainee/AddHabitsManual", data),
     addMeal: (data) => axios.post(BASE_URL + "trainee/addMealsManual", data),
     weeklySummary: (params) => axios.get(BASE_URL + "trainee/weeklySummary", { params }),
     nutritionCard: (params) => axios.get(BASE_URL + "trainee/nutritionCoach", { params })
@@ -43,6 +43,7 @@ function attachEvents() {
             document.getElementById("aiResponse").innerText = res.data.success ? "Entries saved!" : res.data.message;
             console.log(res);
         } catch (err) {
+           // console.log(err)
             document.getElementById("aiResponse").innerText = "Error: " + err.response?.data?.message;
         }
     };
@@ -63,9 +64,12 @@ function attachEvents() {
 
         try {
             const res = await TraineeAPI.addHabit(data);
+            
             document.getElementById("habitResponse").innerText = res.data.success ? res.data.data : res.data.message;
+            console.log(res)
         } catch (err) {
             document.getElementById("habitResponse").innerText = "Error: " + err.response?.data?.message;
+            console.log("her")
         }
     };
 

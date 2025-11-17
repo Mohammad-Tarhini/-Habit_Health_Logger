@@ -33,7 +33,10 @@ class TraineeController {
 
     public function EntriesAndHabitsByText()
     {
+        error_reporting(E_ERROR | E_PARSE);
       global $connection;
+      $input = json_decode(file_get_contents("php://input"), true);
+       $id = $input['id'] ?? null; 
       $id=$this->autho($connection);
         
         // --------------------
@@ -72,7 +75,7 @@ class TraineeController {
         }
     }
     public function weeklySummary()
-    {
+    {error_reporting(E_ERROR | E_PARSE);
     global $connection;
     $this->autho($connection);
     if (!isset($_GET["id"])) {
@@ -85,7 +88,7 @@ class TraineeController {
     }
 
     public function nutritionCoach()
-    {
+    {error_reporting(E_ERROR | E_PARSE);
         global $connection;
     
         $this->autho($connection);
@@ -100,30 +103,65 @@ class TraineeController {
         echo TraineeService::getNutritionCoachCard($connection, $id);
     }
 
-    public function addEntriesAndHabitsManual(){
+    public function addEntriesAndHabitsManual() {
+        error_reporting(E_ERROR | E_PARSE);
         global $connection;
-        $this->autho($connection);
-        
+    
+        // Read JSON from axios
+        $body = json_decode(file_get_contents("php://input"), true);
+        if ($body) {
+            $_POST = $body; // Convert to POST
+        }
+    
+        if (!isset($_POST['id']) || empty($_POST['id'])) {
+            echo ResponseService::error("User ID is missing");
+            exit;
+        }
+    
         $dayData = [
-          
-          "user_id"          => (int)$_POST['id'] ,
-          "exercise_minutes" => isset($_POST['exercise_minutes']) ? (int)$_POST['exercise_minutes'] : null,
-          "walk_minutes"     => isset($_POST['walk_minutes']) ? (int)$_POST['walk_minutes'] : null,
-          "steps"            => isset($_POST['steps']) ? (int)$_POST['steps'] : null,
-          "sleep_hour"       => isset($_POST['sleep_hour']) ? (float)$_POST['sleep_hour'] : null,
-          "caffeine"         => isset($_POST['caffeine']) ? (int)$_POST['caffeine'] : null,
-          "calories_intake"  => isset($_POST['calories_intake']) ? (int)$_POST['calories_intake'] : null,
-          "calories_burn"    => isset($_POST['calories_burn']) ? (int)$_POST['calories_burn'] : null,
-          "day"              => isset($_POST['day']) ? $_POST['day'] : null
+            "user_id"          => (int)$_POST['id'],
+            "exercise_minutes" => isset($_POST['exercise_minutes']) ? (int)$_POST['exercise_minutes'] : null,
+            "walk_minutes"     => isset($_POST['walk_minutes']) ? (int)$_POST['walk_minutes'] : null,
+            "steps"            => isset($_POST['steps']) ? (int)$_POST['steps'] : null,
+            "sleep_hour"       => isset($_POST['sleep_hour']) ? (float)$_POST['sleep_hour'] : null,
+            "caffeine"         => isset($_POST['caffeine']) ? (int)$_POST['caffeine'] : null,
+            "calories_intake"  => isset($_POST['calories_intake']) ? (int)$_POST['calories_intake'] : null,
+            "calories_burn"    => isset($_POST['calories_burn']) ? (int)$_POST['calories_burn'] : null,
+            "day"              => isset($_POST['day']) ? $_POST['day'] : null
         ];
-
+    
+        $Autho = Middleware::Authorization($connection, $dayData["user_id"]);
+    
+        if (!$Autho) {
+            echo ResponseService::error("The user is not authorized");
+            exit;
+        }
+    
+        if ($Autho !== "trainee") {
+            echo ResponseService::error("The user is not a trainee");
+            exit;
+        }
+    
         $traineeDay = new TraineeDayInfo($dayData);
-        $result=TraineeService::addHabitsManual($connection,$traineeDay);
+        $result = TraineeService::addHabitsManual($connection, $traineeDay);
+    
         echo $result;
     }
+
     public function addMealsManual(){
-        global  $connection;
-        $this->autho($connection);
+        error_reporting(E_ERROR | E_PARSE);
+        global $connection;
+    
+        // Read JSON from axios
+        $body = json_decode(file_get_contents("php://input"), true);
+        if ($body) {
+            $_POST = $body; // Convert to POST
+        }
+    
+        if (!isset($_POST['id']) || empty($_POST['id'])) {
+            echo ResponseService::error("User ID is missing");
+            exit;
+        }
 
         $mealData=[
             "user_id"  => isset($_POST['id']),
@@ -131,9 +169,21 @@ class TraineeController {
           "datetime"     => isset($_POST['datetime']) ? $_POST['datetime'] : null,
           "meal_categories"            => isset($_POST['meal_categories']) ? (int)$_POST['meal_categories'] : null,
         ];
+        $Autho = Middleware::Authorization($connection, $mealData["user_id"]);
+    
+        if (!$Autho) {
+            echo ResponseService::error("The user is not authorized");
+            exit;
+        }
+    
+        if ($Autho !== "trainee") {
+            echo ResponseService::error("The user is not a trainee");
+            exit;
+        }
+    
 
         $traineeMeal=new Meal($mealData);
-        $result=TrainService::addMealManual($connection,$traineeMeal);
+        $result=TraineeService::addMealManual($connection,$traineeMeal);
         echo $result;
 
 

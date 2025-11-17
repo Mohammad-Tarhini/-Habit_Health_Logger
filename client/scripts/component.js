@@ -38,7 +38,7 @@ export function dailyEntriesComponent() {
         <h2>View Daily Habits & Entries</h2>
         <input type="date" id="dayDate">
         <textarea id="text" placeholder="Enter description for AI..."></textarea>
-        <button id="sendTextBtn">Send to AI</button>
+        <button id="sendTextBtn">save data of text</button>
         <div id="aiResponse"></div>
     </section>
     `;
