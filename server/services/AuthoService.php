@@ -1,6 +1,6 @@
 <?php
-require_once("../Controller/AuthoController.php");
-require_once("../models/User.php");
+require_once __DIR__ . '/../controllers/AuthoController.php';
+require_once __DIR__ . '/../models/User.php';
 
 
 
@@ -22,6 +22,9 @@ class AuthoService {
 
     public static function checkUserExist(string $email, mysqli $connection) {
         $users = User::findByColumn($connection, "email", $email);
+         if ($users === null) {
+        $users = [];
+        }
         return (count($users) > 0) ? $users : "";
     }
 
@@ -50,7 +53,7 @@ class AuthoService {
 
     
     
-    public static function signIn(string $email, string $password, mysqli $connection)
+    public static function signIn(string $email, string $password, string $role, mysqli $connection)
     {
         if (strpos($email, '@') === false || strpos($email, '.') === false) {
             return "Invalid email format";
@@ -64,15 +67,22 @@ class AuthoService {
         if ($usersExist === "") {
             return "User does not exist";
         }
+        $users = User::findByColumn($connection, "email", $email) ?? [];
+        $user=$users[0];
+        if($user===[])
+            return "is not found ";
 
-        $user = $usersExist[0]; 
-
+        $userRole=$user->getrole();
+        if($userRole !==$role){
+            return "is not correct  role ";
+        }
+         
         
         if (!password_verify($password, $user->getPassword())) {
             return "Invalid password";
         }
-
-        return $user->getId(); 
+         $userId= $user->getID();
+        return $userId ; 
     }
 
    

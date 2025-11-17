@@ -1,13 +1,15 @@
 <?php
-require_once(__DIR__ . "/../models/Car.php");
-require_once(__DIR__ . "/../connection/connection.php");
-require_once(__DIR__ . "/../services/ResponseService.php");
-require_once(__DIR__."/../services/AuthoService.php");
+require_once __DIR__ . '/../services/AuthoService.php';
+require_once __DIR__ . '/../models/User.php';
+//require_once __DIR__'/../utils/headers';
+
 
 
 class AuthoController{
 
     public function signUp() {
+    
+
         global $connection;
 
         // Validate POST data
@@ -47,12 +49,13 @@ class AuthoController{
         }
         $email = $_POST['email'];
         $password = $_POST['password'];
+        $role=$_POST['role'];
 
-        $signInResult=AuthoService::signIn($email,$password,$connection);
+        $signInResult=AuthoService::signIn($email,$password,$role,$connection);
         if(is_int($signInResult)){
-            echo ResponseService::success("userId"=>$signInResult);
+            echo ResponseService::success(["userId" => $signInResult, "role"=>$role]);
         }else{
-            echo ResponseService::success(signInResult,409);
+            echo ResponseService::error($signInResult,409);
         }
 
     }

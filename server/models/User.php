@@ -6,18 +6,17 @@ class User extends Model{
     private string $name;
     private string $email;
     private string $password;
-    private string $role;
+     private string $role = '';
 
-    protected static string $table="cars";
+    protected static string $table="users";
 
-    public function _constructor(array $data){
-        $this->id=$data['id'];
-        $this->name=$data['name'];
-        $this->email=$data['email'];
-        $this->password=$data['password'];
-        $this->role=$data['role'];
+    public function __construct(array $data){
+        $this->id = $data['id'] ?? 0;
+        $this->name = $data['name'] ?? '';
+        $this->email = $data['email'] ?? '';
+        $this->password = $data['password'] ?? '';
+        $this->role = $data['role'] ?? '';
     }
-
     public function getID(){
         return $this->id;
     }
@@ -33,8 +32,11 @@ class User extends Model{
     public function setEmail(string $email){
         $this->email=$email;
     }
-    public function setpassword(string $password){
-        $this->password=$password;
+    public function getPassword(){
+       return $this->password;
+    }
+    public function setPassword(string $password){
+         $this->password=$password;
     }
     public function getrole(){
         return $this->role;
@@ -43,7 +45,7 @@ class User extends Model{
         $this->role=$role;
     }
     public function toArray(){
-        return ["id"=>$this->id, "name"=>$this->name, "email"=>$this->email,"password"=>$this->password,"role"=>$this->role]
+        return ["id"=>$this->id, "name"=>$this->name, "email"=>$this->email,"password"=>$this->password,"role"=>$this->role];
     }
 
 }
