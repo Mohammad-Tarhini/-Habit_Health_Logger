@@ -11,11 +11,11 @@ const AuthAPI = {
     })
 };
 
-// ===================== SHOW SIGNIN =====================
+//SHOW SIGNIN 
 export function showSignin() {
     container.innerHTML = signin();
 
-    document.getElementById("signinBtn").onclick = async () => {
+    document.getElementById("signinBtn").addEventListener( "click", async () => {
         const data = {
             email: document.getElementById("email").value,
             password: document.getElementById("password").value,
@@ -47,15 +47,15 @@ export function showSignin() {
 
             alert("Error: " + message);
         }
-    };
+    });
 
-    document.getElementById("toSignup").onclick = showSignup;
+    document.getElementById("toSignup").addEventListener("click",showSignup);
 }
-// ===================== SHOW SIGNUP =====================
+//SHOW SIGNUP
 export function showSignup() {
     container.innerHTML = signup();
 
-    document.getElementById("signupBtn").onclick = async () => {
+    document.getElementById("signupBtn").addEventListener("click",  async () => {
         const data = {
             name: document.getElementById("name").value,
             email: document.getElementById("email").value,
@@ -81,10 +81,10 @@ export function showSignup() {
 
             alert("Error: " + message);
         }
-    };
+    });
 
-    document.getElementById("toSignin").onclick = showSignin;
+    document.getElementById("toSignin").addEventListener("click",showSignin);
 }
 
-// Default page:
+
 showSignin();

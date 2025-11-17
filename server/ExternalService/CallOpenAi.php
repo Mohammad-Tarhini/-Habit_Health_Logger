@@ -1,5 +1,6 @@
 <?php 
-require_once __DIR__ . '/../utils/config.php';
+//require_once __DIR__ . '/../utils/config.php';
+require_once __DIR__ .'/../.gitignore';
 //include_once __DIR__ . "/../../utils/logMessage.php";
 function requestOpenAi($instruction){// call the openAI
     // generate request

@@ -14,8 +14,7 @@ public static function take_data_from_text_to_database(mysqli $connection, $text
     if (empty($text) || empty($day)) {
         return "Please enter text or date";
     }
-
-    // 1) AI extract data
+    //review on ai
     $daysInfo = TextReview::reviewTextGenenal($text);
     $mealInfo = TextReview::reviewTextforMeals($text);
     if(!is_array($mealInfo) && !is_array($daysInfo)  ){
@@ -26,13 +25,13 @@ public static function take_data_from_text_to_database(mysqli $connection, $text
     }
     
 
-    // 2) Get existing day record
-    //$existingDay = TraineeDayInfo::findAllWhere($connection, ["day" => $day, "user_id" => $userid]);
+    // Get existing day record
+    $existingDay = TraineeDayInfo::findAllWhere($connection, ["day" => $day, "user_id" => $userid]);
     
 
-    // 3) SAVE DAILY GENERAL INFO
-    if (! empty($daysInfo) || !isset($daysInfo['error'])) {
-        
+    //  save daily info
+    if !empty($daysInfo) || !isset($daysInfo['error']) {
+        if(empty($existingDay)){
            
             $daysInfo["day"] = $day;
             $daysInfo["user_id"] = $userid;
@@ -52,31 +51,29 @@ public static function take_data_from_text_to_database(mysqli $connection, $text
             if($result===false) return "cannot insert";
             if(empty($result)) return "error in insertation ";
             if(!is_int($result))return "error on add data ";
-
-        //  else {
-        //     $dayObj = $existingDay[0];
-
-        //     if (isset($daysInfo['exercise_minutes'])) $dayObj->setExerciseMinutes((int)$daysInfo['exercise_minutes'] +(int) $dayObj->getExerciseMinutes());
-        //     if (isset($daysInfo['walk_minutes'])) $dayObj->setWalkMinutes((int)$daysInfo['walk_minutes'] +(int) $dayObj->getWalkMinutes());
-        //     if (isset($daysInfo['steps'])) $dayObj->setSteps((int)$daysInfo['steps'] + (int)$dayObj->getSteps());
-        //     if (isset($daysInfo['sleep_hour'])) $dayObj->setSleepHour((float)$daysInfo['sleep_hour'] );
-        //     if (isset($daysInfo['caffeine'])) $dayObj->setCaffeine((int)$daysInfo['caffeine'] + (int)$dayObj->getCaffeine());
-        //     if (isset($daysInfo['calories_intake'])) $dayObj->setCaloriesIntake((int)$daysInfo['calories_intake'] + (int)$dayObj->getCaloriesIntake());
-        //     if (isset($daysInfo['calories_burn'])) $dayObj->setCaloriesBurn((int)$daysInfo['calories_burn'] + (int)$dayObj->getCaloriesBurn());
-            
-        //     $result = $dayObj->update($connection);
-        //     if ($result === false) return "Cannot update day info";
-        //     if(empty($result)) return "uihsduhufh";
-            
-        // }
+        }
+          else {
+             $dayObj = $existingDay[0];
+             if (isset($daysInfo['exercise_minutes'])) $dayObj->setExerciseMinutes((int)$daysInfo['exercise_minutes'] +(int) $dayObj->getExerciseMinutes());
+             if (isset($daysInfo['walk_minutes'])) $dayObj->setWalkMinutes((int)$daysInfo['walk_minutes'] +(int) $dayObj->getWalkMinutes());
+             if (isset($daysInfo['steps'])) $dayObj->setSteps((int)$daysInfo['steps'] + (int)$dayObj->getSteps());
+             if (isset($daysInfo['sleep_hour'])) $dayObj->setSleepHour((float)$daysInfo['sleep_hour'] );
+             if (isset($daysInfo['caffeine'])) $dayObj->setCaffeine((int)$daysInfo['caffeine'] + (int)$dayObj->getCaffeine());
+             if (isset($daysInfo['calories_intake'])) $dayObj->setCaloriesIntake((int)$daysInfo['calories_intake'] + (int)$dayObj->getCaloriesIntake());
+             if (isset($daysInfo['calories_burn'])) $dayObj->setCaloriesBurn((int)$daysInfo['calories_burn'] + (int)$dayObj->getCaloriesBurn());
+      
+             $result = $dayObj->update($connection);
+             if ($result === false) return "Cannot update day info";
+             if(empty($result)) return "uihsduhufh";
+      
+         }
     }
 
          
-    // 4) SAVE MEALS INFO
+    // save meals info now
     
     if (!empty($mealInfo)  && !isset($mealInfo['error'])) {
         foreach ($mealInfo as $mealItem) {
-        // Make sure each item is an array
         if (!is_array($mealItem)) continue;
     
         $meal = new Meal([
@@ -97,9 +94,9 @@ public static function take_data_from_text_to_database(mysqli $connection, $text
 }
 
 
-public static function GiveWeeklySummary(mysqli $connection,$userId){
-     $endDate = date('Y-m-d'); // today
-     $startDate = date('Y-m-d', strtotime('-7 days')); // 7 days ago
+public static function GiveWeeklySummary(mysqli $connection,  $userId,DateTime  $startDate, DateTime  $endDate){
+    //  $endDate = date('Y-m-d'); // today
+    //  $startDate = date('Y-m-d', strtotime('-7 days')); // 7 days ago
     
      
      $weekData = TraineeDayInfo::findByDateRange($connection, "day", $startDate, $endDate, $userId);

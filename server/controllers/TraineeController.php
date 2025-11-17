@@ -5,16 +5,15 @@ require_once (__DIR__.'/../middleware.php');
 
 class TraineeController {
 
-    public static function autho($connection)
+    public static function autho($connection,$id)
     {
         // Check if ID is provided
-        if (empty($_GET['id'])) {
+        if (empty($id)) {
             echo ResponseService::error("We need the ID");
             exit;
         }
     
-        $id = (int)$_GET['id']; // get the user ID
-    
+       
         // Authorization: pass both $connection and $id
         $Autho = Middleware::Authorization($connection, $id);
     
@@ -28,7 +27,7 @@ class TraineeController {
             exit;
         }
     
-        return $id;
+       
     }
 
     public function EntriesAndHabitsByText()
@@ -36,27 +35,26 @@ class TraineeController {
         error_reporting(E_ERROR | E_PARSE);
       global $connection;
       $input = json_decode(file_get_contents("php://input"), true);
-       $id = $input['id'] ?? null; 
-      $id=$this->autho($connection);
+       
+       if(!isset($input['id'])){
+        echo ResponseService::error("where the user id");
+       }
+       $id = $input['id'] ;
+       $this->autho($connection,$id);
         
-        // --------------------
-        // Validate Inputs
-        // --------------------
-        if ( empty($_GET["dayDate"]) || empty($_GET["text"])) {
+       
+        if ( empty($input["dayDate"]) || empty($input["text"])) {
             echo ResponseService::error("We need more data");
             return;
         }
 
        
-        $dayDate = $_GET["dayDate"];
-        $text = $_GET["text"];
+        $dayDate = $input["dayDate"];
+        $text = $input["text"];
 
-        global $connection;
+    
 
-       
-        // --------------------
-        // Execute service
-        // --------------------
+  
         $response = TraineeService::take_data_from_text_to_database(
             $connection,
             $text,
@@ -65,25 +63,30 @@ class TraineeController {
          
         );
 
-        // --------------------
-        // Result
-        // --------------------
         if ($response ==="") {
             echo ResponseService::success("Excellent");
         } else {
             echo ResponseService::error($response);
         }
     }
+
+
     public function weeklySummary()
     {error_reporting(E_ERROR | E_PARSE);
     global $connection;
-    $this->autho($connection);
-    if (!isset($_GET["id"])) {
-        echo ResponseService::error("Trainee ID required");
+     $rawBody = file_get_contents("php://input");
+    $body = json_decode($rawBody, true);
+
+    if (!$body) {
+        echo ResponseService::error("Invalid JSON");
         return;
     }
-    $traineeId = intval($_GET["id"]);
-    $result = TraineeService::GiveWeeklySummary($connection, $traineeId);
+    $traineeId     = $body["id"];
+    $dateTimeFrom  = $body["dateTimeFrom"] ?? date("Y-m-d 00:00:00", strtotime("-7 days"));
+    $dateTimeTo    = $body["dateTimeTo"] ??  date("Y-m-d 23:59:59");
+    $this->autho($connection,$traineeId);
+
+    $result = TraineeService::GiveWeeklySummary($connection, $traineeId,$dateTimeFrom,$dateTimeTo);
     echo $result;
     }
 
@@ -91,14 +94,15 @@ class TraineeController {
     {error_reporting(E_ERROR | E_PARSE);
         global $connection;
     
-        $this->autho($connection);
+       
     
         if (!isset($_GET["id"])) {
             echo ResponseService::error("Trainee ID is required");
             return;
         }
     
-        $id = intval($_GET["id"]);
+        $id = $_GET["id"];
+         $this->autho($connection,$id);
     
         echo TraineeService::getNutritionCoachCard($connection, $id);
     }
@@ -116,6 +120,14 @@ class TraineeController {
         if (!isset($_POST['id']) || empty($_POST['id'])) {
             echo ResponseService::error("User ID is missing");
             exit;
+        }   
+        $id=$_POST['id'];
+        $this->autho($connection,$id);
+
+        if(empty($_POST['exercise_minutes'])&& empty($_POST['walk_minutes'])&& empty($_POST['steps'])&& empty($_POST['sleep_hour']) && empty($_POST['caffeine']) && empty($_POST['calories_intake'])){
+            echo ResponseService::error("no data ");
+            exit;
+
         }
     
         $dayData = [
@@ -130,17 +142,7 @@ class TraineeController {
             "day"              => isset($_POST['day']) ? $_POST['day'] : null
         ];
     
-        $Autho = Middleware::Authorization($connection, $dayData["user_id"]);
-    
-        if (!$Autho) {
-            echo ResponseService::error("The user is not authorized");
-            exit;
-        }
-    
-        if ($Autho !== "trainee") {
-            echo ResponseService::error("The user is not a trainee");
-            exit;
-        }
+
     
         $traineeDay = new TraineeDayInfo($dayData);
         $result = TraineeService::addHabitsManual($connection, $traineeDay);
@@ -155,13 +157,16 @@ class TraineeController {
         // Read JSON from axios
         $body = json_decode(file_get_contents("php://input"), true);
         if ($body) {
-            $_POST = $body; // Convert to POST
+            $_POST = $body; 
         }
     
         if (!isset($_POST['id']) || empty($_POST['id'])) {
             echo ResponseService::error("User ID is missing");
             exit;
         }
+        $id=$_POST['id'];
+        $this->autho($connection,$id);
+       
 
         $mealData=[
             "user_id"  => isset($_POST['id']),
@@ -169,28 +174,22 @@ class TraineeController {
           "datetime"     => isset($_POST['datetime']) ? $_POST['datetime'] : null,
           "meal_categories"            => isset($_POST['meal_categories']) ? (int)$_POST['meal_categories'] : null,
         ];
-        $Autho = Middleware::Authorization($connection, $mealData["user_id"]);
-    
-        if (!$Autho) {
-            echo ResponseService::error("The user is not authorized");
-            exit;
-        }
-    
-        if ($Autho !== "trainee") {
-            echo ResponseService::error("The user is not a trainee");
-            exit;
-        }
+
     
 
         $traineeMeal=new Meal($mealData);
         $result=TraineeService::addMealManual($connection,$traineeMeal);
         echo $result;
-
-
     }
+
+
+    
     public function TakeSuggestionFromAi(){
         global $connection;
-        $this->autho($connection);
+        if(!isset($_GET["id"])){
+            echo  ResponseService::error("where your id  ");
+        }
+        $this->autho($connection,$id);
         if(!isset($_POST['text'])){
             echo ResponseService::error("there is error ");
             return;

@@ -32,22 +32,24 @@ export function signup() {
 }
 
 // components.js
+// component.js
 export function dailyEntriesComponent() {
     return `
-    <section>
-        <h2>View Daily Habits & Entries</h2>
+    <section id="dailySection" class="dashboard-section">
+        <h2>Enter Daily Habits & Entries By text</h2>
         <input type="date" id="dayDate">
         <textarea id="text" placeholder="Enter description for AI..."></textarea>
-        <button id="sendTextBtn">save data of text</button>
-        <div id="aiResponse"></div>
+        <button id="sendTextBtn">Save data of text</button>
+        <div id="aiResponse" class="response"></div>
+        <div id="askingAi" class="response"></div>
     </section>
     `;
 }
 
 export function addHabitComponent() {
     return `
-    <section>
-        <h2>Add Habits Manually</h2>
+    <section id="habitSection" class="dashboard-section">
+        <h2>Add Daily Habits Manually</h2>
         <input type="number" id="exercise_minutes" placeholder="Exercise Minutes">
         <input type="number" id="walk_minutes" placeholder="Walk Minutes">
         <input type="number" id="steps" placeholder="Steps">
@@ -57,42 +59,53 @@ export function addHabitComponent() {
         <input type="number" id="calories_burn" placeholder="Calories Burned">
         <input type="date" id="habit_day">
         <button id="addHabitBtn">Add Habit</button>
-        <div id="habitResponse"></div>
+        <div id="habitResponse" class="response"></div>
     </section>
     `;
 }
 
 export function addMealComponent() {
     return `
-    <section>
+    <section id="mealSection" class="dashboard-section">
         <h2>Add Meals Manually</h2>
         <input type="text" id="meals" placeholder="Meal Description">
         <input type="datetime-local" id="meal_datetime">
         <input type="text" id="meal_categories" placeholder="Meal Category">
         <button id="addMealBtn">Add Meal</button>
-        <div id="mealResponse"></div>
+        <div id="mealResponse" class="response"></div>
     </section>
     `;
 }
 
 export function weeklySummaryComponent() {
     return `
-    <section>
+    <section id="weeklySection" class="dashboard-section">
         <h2>Weekly Summary</h2>
+        <input type="datetime-local" id="dateTimeFrom" >
+        <input type="datetime-local" id="dateTimeTo">
         <button id="weeklySummaryBtn">Get Weekly Summary</button>
-        <div id="weeklySummary"></div>
+        <div id="weeklySummary" class="response"></div>
     </section>
     `;
 }
 
 export function nutritionCardComponent() {
     return `
-    <section>
+    <section id="nutritionSection" class="dashboard-section">
         <h2>Nutrition Coach Card</h2>
         <button id="nutritionBtn">Get Nutrition Advice</button>
-        <div id="nutritionCard"></div>
+        <div id="nutritionCard" class="response"></div>
     </section>
     `;
 }
 
-
+export function aiSuggestionComponent() {
+    return `
+    <section id="aiSection" class="dashboard-section">
+        <h2>Get AI Suggestion</h2>
+        <textarea id="suggestionText" placeholder="Enter your text for AI suggestion..."></textarea>
+        <button id="getSuggestionBtn">Get Suggestion</button>
+        <div id="suggestionResponse" class="response"></div>
+    </section>
+    `;
+}

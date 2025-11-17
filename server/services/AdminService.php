@@ -50,6 +50,32 @@ public static function GetTraineeInfoDays(mysqli $connection, int $traineeId)
 
     return $trainee_info_to_send_to_admin;
 }
+public static function deleteTrainee($connection,$traineeId){
+$isTraineeFound=User::findById($connection,$traineeId);
+if($isTraineeFound==null){
+    return "the trainee id is wrong";
+}
+if(User::deleteById($connection,$traineeId))
+    return true;
+return false;
+
+}
+public static function deleteTraineeDayInfo($connection,$day,$traineeid){
+$isTraineeFound=User::findById($connection,$traineeId);
+if($isTraineeFound==null){
+    return "the trainee id is wrong";
+}
+$existTraineeDaInfo=TraineeDayInfo::findAllWhere($connection,["user_id"=>$trainee_id,"day"=>$day]);
+if(empty($existTraineeDaInfo)){
+    return "no data to delete";
+}
+if(existTraineeDaInfo->deleteByObject($connection)){
+    return true;
+}
+return false;
+
+}
+
 
 
 }

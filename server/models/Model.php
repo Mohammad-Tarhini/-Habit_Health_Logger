@@ -176,53 +176,39 @@ abstract class Model{
         return empty($allData) ? null : $allData;
     }
 
-public static function findAllWhere(mysqli $connection, array $conditions)
-{
-    $table = static::$table;
-
-    // Build WHERE clause
-    $clauses = [];
-    $types = "";
-    $values = [];
-
-    foreach ($conditions as $column => $value) {
-        $clauses[] = "$column = ?";
-        $types .= is_int($value) ? "i" : "s";
-        $values[] = $value;
-    }
-
-    $where = implode(" AND ", $clauses);
-
-    $sql = "SELECT * FROM $table WHERE $where";
-
-    $stmt = $connection->prepare($sql);
-    $stmt->bind_param($types, ...$values);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-
-    $objects = [];
-
-    while ($row = $result->fetch_assoc()) {
-        $objects[] = new static($row);
-    }
-
-    return !empty($objects) ? $objects : null;
+    public static function findAllWhere(mysqli $connection, array $conditions)
+    {
+        $table = static::$table;
+    
+        // Build WHERE clause
+        $clauses = [];
+        $types = "";
+        $values = [];
+    
+        foreach ($conditions as $column => $value) {
+            $clauses[] = "$column = ?";
+            $types .= is_int($value) ? "i" : "s";
+            $values[] = $value;
+        }
+    
+        $where = implode(" AND ", $clauses);
+    
+        $sql = "SELECT * FROM $table WHERE $where";
+    
+        $stmt = $connection->prepare($sql);
+        $stmt->bind_param($types, ...$values);
+        $stmt->execute();
+    
+        $result = $stmt->get_result();
+    
+        $objects = [];
+    
+        while ($row = $result->fetch_assoc()) {
+            $objects[] = new static($row);
+        }
+    
+        return !empty($objects) ? $objects : null;
+    }   
 }
-
-
-
-    
-    
-
-
-    
-}
-
-
-
-
-
-
 
 ?>
