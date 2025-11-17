@@ -27,9 +27,9 @@ $apis = [
     '/trainee/entriesAndHabits'  => ['controller' => 'TraineeController', 'method' => 'EntriesAndHabitsByText'],
     '/trainee/weeklySummary'     => ['controller' => 'TraineeController', 'method' => 'weeklySummary'],
     '/trainee/nutritionCoach'    => ['controller' => 'TraineeController', 'method' => 'nutritionCoach'],
-    'trainee/AddHabitsManual'   =>['controller' =>'TraineeController','method'=>'addEntriesAndHabitsManual'],
-    'trainee/addMealsManual'   =>['controller'=>'TraineeController', 'method'=>'addMealsManual'],
-    'trainee/TakeSuggestionFromAi' =>['controller'=>'TraineeController' ,'method'=>'TakeSuggestionFromAi']
+    '/trainee/AddHabitsManual'   =>['controller' =>'TraineeController','method'=>'addEntriesAndHabitsManual'],
+    '/trainee/addMealsManual'   =>['controller'=>'TraineeController', 'method'=>'addMealsManual'],
+    '/trainee/TakeSuggestionFromAi' =>['controller'=>'TraineeController' ,'method'=>'TakeSuggestionFromAi']
 ];
 
 if (isset($apis[$request])) {

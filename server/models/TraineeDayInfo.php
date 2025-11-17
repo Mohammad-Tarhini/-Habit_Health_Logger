@@ -2,16 +2,16 @@
 require_once("Model.php");
 
 class TraineeDayInfo extends Model {
-    private int $id;
+    private ?int $id;
     private int $user_id;
-    private int $exercise_minutes;
+    private ?int $exercise_minutes;
     private ?int $walk_minutes;
     private ?int $steps;
     private ?float $sleep_hour;
     private ?int $caffeine;
     private ?int $calories_intake;
     private ?int $calories_burn;
-    private string $day;
+    private DateTime $day;
 
     protected static string $table = "trainees_days_info";
 
@@ -26,7 +26,7 @@ class TraineeDayInfo extends Model {
         $this->caffeine = $data['caffeine'] ?? null;
         $this->calories_intake = $data['calories_intake'] ;
         $this->calories_burn = $data['calories_burn'] ;
-        $this->day = $data['day'] ?? date('Y-m-d');
+       $this->day = new DateTime($data['day']);
     }
 
     // Getters
@@ -63,7 +63,7 @@ class TraineeDayInfo extends Model {
             "caffeine" => $this->caffeine,
             "calories_intake" => $this->calories_intake,
             "calories_burn" => $this->calories_burn,
-            "day" => $this->day
+            "day" => $this->day->format("Y-m-d")
         ];
     }
 }

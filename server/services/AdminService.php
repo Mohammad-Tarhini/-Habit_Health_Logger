@@ -38,14 +38,13 @@ public static function GetTraineeInfoDays(mysqli $connection, int $traineeId)
     foreach ($traineeDays as $info) {
           $trainee_info_to_send_to_admin[] = [
                 "id"          => $info->getId(),
-                "day_date"    => $info->getDate(),
+                "day_date"    => $info->getDay(),
                 "walk_minutes"=> $info->getWalkMinutes(),
-                "walk_steps"  => $info->getWalkSteps(),
-                "sleep_hours" => $info->getSleepHours(),
-                "wake_up_hour"=> $info->getWakeUpHour(),
+                "walk_steps"  => $info->getSteps(),
+                "sleep_hours" => $info->getSleepHour(),
                 "caffeine"    => $info->getCaffeine(),
-                "calories_eaten"=> $info->getCaloriesEaten(),
-                "calories_burned"=> $info->getCaloriesBurned()
+                "calories_eaten"=> $info->getCaloriesIntake(),
+                "calories_burned"=> $info->getCaloriesBurn()
             ];
     }
 

@@ -1,5 +1,5 @@
 <?php
-class weeklyAiSummary{
+class GenerateAiSummary{
 
     private static function isJsonLike($text)
      {
@@ -24,7 +24,7 @@ class weeklyAiSummary{
 
     if ($retry === 0) {
         $instruction = <<<EOD
-Summarize the following weekly data.
+Summarize the following weekly data  as you are dietition and also it contain your advices and let the paragraph be very small.
 
 Return ONLY plain text (no json).
 
@@ -48,12 +48,15 @@ EOD;
     // Call AI
     $response = requestOpenAi($instruction);
 
-    if (!isset($response['choices'][0]['message']['content'])) {
-        return [
-            "success" => false,
-            "error"   => "Invalid AI response structure"
-        ];
-    }
+    // if (!isset($response['choices'][0]['message']['content'])) {
+    //     return [
+    //         "success" => false,
+    //         "error"   => "Invalid AI response structure"
+    //     ];
+    // }
+    if (is_string($response)) {
+    $response = json_decode($response, true);
+}
 
     $text = $response['choices'][0]['message']['content'];
 
@@ -121,13 +124,16 @@ EOD;
 
     $response = requestOpenAi($instruction);
 
-    if (!isset($response['choices'][0]['message']['content'])) {
-        return [
-            "success" => false,
-            "error"   => "Invalid AI structure"
-        ];
-    }
+    // if (!isset($response['choices'][0]['message']['content'])) {
+    //     return [
+    //         "success" => false,
+    //         "error"   => "Invalid AI structure"
+    //     ];
+    // }
 
+     if (is_string($response)) {
+    $response = json_decode($response, true);
+     }
     $text = trim($response['choices'][0]['message']['content']);
 
     if (strlen($text) < 10) {

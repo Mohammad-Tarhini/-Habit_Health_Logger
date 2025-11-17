@@ -106,7 +106,7 @@ class TraineeController {
         
         $dayData = [
           
-          "user_id"          => isset($_POST['id']) ? (int)$_POST['id'] : null,
+          "user_id"          => (int)$_POST['id'] ,
           "exercise_minutes" => isset($_POST['exercise_minutes']) ? (int)$_POST['exercise_minutes'] : null,
           "walk_minutes"     => isset($_POST['walk_minutes']) ? (int)$_POST['walk_minutes'] : null,
           "steps"            => isset($_POST['steps']) ? (int)$_POST['steps'] : null,
@@ -126,14 +126,14 @@ class TraineeController {
         $this->autho($connection);
 
         $mealData=[
-            "user_id"  => isset($_POST['id']) ? (int)$_POST['id'] : null,
+            "user_id"  => isset($_POST['id']),
           "meals" => isset($_POST['>meals ']) ? (int)$_POST['meals '] : null,
-          "datetime"     => isset($_POST['datetime']) ? (int)$_POST['datetime'] : null,
+          "datetime"     => isset($_POST['datetime']) ? $_POST['datetime'] : null,
           "meal_categories"            => isset($_POST['meal_categories']) ? (int)$_POST['meal_categories'] : null,
         ];
 
         $traineeMeal=new Meal($mealData);
-        $result=TrainService::addMealManual($connection,$mealData);
+        $result=TrainService::addMealManual($connection,$traineeMeal);
         echo $result;
 
 

@@ -110,14 +110,16 @@ public static function GiveWeeklySummary(mysqli $connection,$userId){
     $jsonReady = [];
     foreach ($weekData as $day) {
         $jsonReady[] = [
-            "day_date"   => $day->day_date,
-            "exercises"  => $day->exercises,
-            "meals"      => $day->meals,
-            "calories"   => $day->calories ?? null,
-            "sleep"      => $day->sleep ?? null
+            "day_date"   => $day->getDay(),
+            "exercises"  => $day->getExerciseMinutes(),
+            "calories"   => $day->getCaloriesIntake() ,
+            "sleep"      => $day->getSteps() ,
+            "getWalkMinutes"=>$day->getWalkMinutes(),
+            "getCaffeine"=>$day->getCaffeine(),
+            "getCaloriesBurn"=>$day->getCaloriesBurn(),
         ];
     }
-   $summaryResult = AiService::summarizeJsonText($jsonReady);
+   $summaryResult = GenerateAiSummary::summarizeJsonText($jsonReady);
 
     if (!$summaryResult["success"]) {
         return ResponseService::error($summaryResult["error"]);
@@ -127,34 +129,37 @@ public static function GiveWeeklySummary(mysqli $connection,$userId){
 
 }
 
-public static function getNutritionCoachCard($connection, int $traineeId){
+public static function getNutritionCoachCard(mysqli $connection, int $traineeId){
     $endDate = date('Y-m-d'); // today
     $startDate = date('Y-m-d', strtotime('-7 days')); // 7 days ago
-    $previosDaysData = TraineeDayInfo::findByDateRange($connection, "day", $startDate, $endDate, $traineeId);
+    $weekData = TraineeDayInfo::findByDateRange($connection, "day", $startDate, $endDate, $traineeId);
     $todayMeals = Meal::findByDateRange($connection, "datetime", $endDate." 00:00:00", $endDate." 23:59:59", $traineeId);
-    if (empty($previosDaysData)) {
+    if (empty($weekData) && empty($todayMeals)) {
         return ResponseService::success("No data to help you");
     }
+    if(!empty($todayMeals)){
     $mealArray = [];
     foreach ($todayMeals as $meal) {
         $mealArray[] = [
-            "meals"          => $meal->meals,
-            "datetime"       => $meal->datetime,
-            "meal_categories"=> $meal->meal_categories,
-            "calories_intake"=> $meal->calories_intake
+            "meal"          => $meal->getMeals(),
+            "datetime"       => $meal->getDateTime(),
+            "meal_categories"=> $meal->getMealCategories(),
         ];}
-
+    }
+    if (empty($weekData)) {
     $jsonReady = [];
     foreach ($weekData as $day) {
         $jsonReady[] = [
-            "day_date"   => $day->day_date,
-            "exercises"  => $day->exercises,
-            "meals"      => $day->meals,
-            "calories"   => $day->calories ?? null,
-            "sleep"      => $day->sleep ?? null
+          "day_date"   => $day->getDay(),
+            "exercises"  => $day->getExerciseMinutes(),
+            "calories"   => $day->getCaloriesIntake() ,
+            "sleep"      => $day->getSteps() ,
+            "getWalkMinutes"=>$day->getWalkMinutes(),
+            "getCaffeine"=>$day->getCaffeine(),
+            "getCaloriesBurn"=>$day->getCaloriesBurn(),
         ];
-    }
-    $coach = AiService::nutritionCoachCard($mealArray,$jsonReady);
+    }}
+    $coach = GenerateAiSummary::nutritionCoachCard($mealArray,$jsonReady);
     if (!$coach["success"]) {
         return ResponseService::error($coach["error"]);
     }
