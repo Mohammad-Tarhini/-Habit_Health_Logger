@@ -1,0 +1,141 @@
+/* trainee.css - sidebar layout + content */
+
+/* keep your existing styles but add sidebar/grid rules below */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 24px;
+    align-items: start;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Sidebar */
+.sidebar {
+    background: rgba(255,255,255,0.95);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-header h3 {
+    margin: 0 0 12px 0;
+    color: #2575fc;
+    font-size: 18px;
+}
+
+/* Menu buttons */
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.menu-btn {
+    background: transparent;
+    border: none;
+    padding: 10px 12px;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #333;
+   
+}
+
+.menu-btn:hover {
+    background: rgba(37,117,252,0.08);
+    color: #2575fc;
+    transform: translateX(4px);
+}
+
+.menu-btn.active {
+    background: linear-gradient(90deg, rgba(37,117,252,0.12), rgba(37,117,252,0.06));
+    color: #2575fc;
+    box-shadow: inset 0 0 0 1px rgba(37,117,252,0.06);
+}
+
+/* Main content area */
+.main-content {
+    min-height: 400px;
+}
+
+/* Keep existing section style but ensure hidden by default */
+.dashboard-section {
+    display: none; /* shown by showSection() */
+    background-color: rgba(255,255,255,0.98);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+/* Reuse your previous styles for headings, inputs, buttons */
+.dashboard-section h2 {
+    color: #2575fc;
+    margin-bottom: 12px;
+}
+
+input, textarea, select {
+    width: 100%;
+    max-width: 480px;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 15px;
+}
+
+button {
+    padding: 10px 14px;
+    margin-top: 8px;
+    border: none;
+    border-radius: 8px;
+    background-color: #2575fc;
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.response {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f1f1f1;
+    min-height: 36px;
+}
+
+/* Responsive: collapse to single column and make sidebar horizontal on small screens */
+@media (max-width: 880px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        padding: 0 12px;
+    }
+
+    .sidebar {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 8px;
+    }
+
+    .menu {
+        flex-direction: row;
+        gap: 6px;
+    }
+
+    .menu-btn {
+        white-space: nowrap;
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
+    .dashboard-section {
+        padding: 16px;
+    }
+}

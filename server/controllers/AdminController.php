@@ -7,13 +7,9 @@ require_once(__DIR__.'/../middleware.php');
 
 class AdminController{
 
-    public static function autho($connection)
+    public static function autho($connection,$id)
     {
-        // Check if ID is provided
-        if (empty($_GET['id'])) {
-            echo ResponseService::error("We need the ID");
-            exit; // stop further execution
-        }
+ 
     
         // Authorization
         $Autho = Middleware::Authorization($connection,$_GET['id']);
@@ -36,7 +32,12 @@ class AdminController{
 
     public function getAllTraineesForAdmin(){
         global $connection;
-        $this->autho($connection);
+        // Check if ID is provided
+        if (empty($_GET['id'])) {
+            echo ResponseService::error("We need the ID");
+            exit; // stop further execution
+        }
+        $this->autho($connection,$id);
         $AllTrainees=AdminService::GetAllTrainees($connection);
         if (empty($AllTrainees)) {
             echo ResponseService::error("No trainees found");
@@ -50,9 +51,12 @@ class AdminController{
     public function getTrainee()
     {
         global $connection;
-    
+        if (empty($_GET['id'])) {
+            echo ResponseService::error("We need the ID");
+            exit; // stop further execution
+        }
         // Authorization check
-        $this->autho($connection);
+        $this->autho($connection,$id);
     
         // Check if TraineeId is provided
         if (!isset($_GET["TraineeId"])) {
@@ -66,13 +70,75 @@ class AdminController{
         $specificTraineeData = AdminService::GetTraineeInfoDays($connection, $traineeId);
     
         if (empty($specificTraineeData)) {
-            echo ResponseService::error("No trainee found");
+            echo ResponseService::error("No info found");
             return;
         }
     
         echo ResponseService::success($specificTraineeData);
     }
 
+    public function deleteTraine(){
+        global $connection;
+        if (empty($_POST['id'])) {
+            echo ResponseService::error("We need the ID");
+            exit;
+        }
+        
+         $this->autho($connection,$id);
+         if(!isset($_POST["traineeid"])){
+           echo ResponseService::error("We need trainee ID");
+         }
+          $traineeid=$_POST["traineeid"];
+         $isdelete= AdminService::deleteTrainee($connection,$traineeId);
+         if($isdelete)
+            echo ResponseService::success("true");
+            exit;
+        echo  ResponseService::error("errorrj");
+    
+
+    }
+
+    public function deleteTraineeInfo(){
+        global $connection;
+        if (empty($_POST['id'])) {
+            echo ResponseService::error("We need the ID");
+            exit;
+        }
+        
+         $this->autho($connection,$id);
+         if(!isset($_POST["traineeid"]) && !isset($_POST["day"])){
+           echo ResponseService::error("We need trainee ID  and date");
+           exit;
+         }
+         $isdelete=AdminService::deleteTraineeDayInfo($connection,$_POST["day"],$_POST["traineeid"]);
+         if($isdelete){
+             echo ResponseService::success("true");
+            exit;
+         }
+         echo ResponseService::error("error in delete ");
+
+    }
+    // public function updateTraineeDayInfo(){
+    //     global $connection;
+    //     if (empty($_POST['id'])) {
+    //         echo ResponseService::error("We need the ID");
+    //         exit;
+    //     }
+        
+    //      $this->autho($connection,$id);
+    //      if(!isset($_POST["traineeid"]) && !isset($_POST["day"])){
+    //        echo ResponseService::error("We need trainee ID  and date");
+    //      }
+
+    // }
+
+          
+
+
+
+
+        
+    
 
 
     
