@@ -18,6 +18,8 @@ $apis = [
     // Admin endpoints
     '/admin/getAllTrainees'      => ['controller' => 'AdminController', 'method' => 'getAllTraineesForAdmin'],
     '/admin/getTrainee'          => ['controller' => 'AdminController', 'method' => 'getTrainee'],
+    '/admin/deleteTraine'        =>['controller'=>'AdminController' , 'method'=>'deleteTraine'],
+    '/admin/deleteTraineeInfo'  =>['controller'=>'AdminController' ,'method'=>'deleteTraineeInfo'],
 
     // Auth endpoints
     '/auth/signup'               => ['controller' => 'AuthoController', 'method' => 'signUp'],

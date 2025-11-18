@@ -30,7 +30,7 @@ public static function take_data_from_text_to_database(mysqli $connection, $text
     
 
     //  save daily info
-    if !empty($daysInfo) || !isset($daysInfo['error']) {
+    if (!empty($daysInfo) || !isset($daysInfo['error'])) {
         if(empty($existingDay)){
            
             $daysInfo["day"] = $day;
