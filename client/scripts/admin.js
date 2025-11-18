@@ -10,8 +10,12 @@ getTrainee: (id, traineeId) => axios.get(BASE_URL + 'admin/getTrainee', { params
  deleteTrainee: (id, traineeId) => 
     axios.post(`${BASE_URL}admin/deleteTraine`, { id, traineeid: traineeId }),
 
-deleteTraineeDayInfo: (id, traineeId, rowId) =>
-    axios.post(`${BASE_URL}admin/deleteTraineeInfo`, { id, traineeid: traineeId, rowId }),
+deleteTraineeDayInfo: (id, traineeId, dayId) =>
+    axios.post(`${BASE_URL}admin/deleteTraineeInfo`, { 
+        id, 
+        traineeid: traineeId,
+        day: dayId 
+    }),
 };
 const admainid=localStorage.getItem("userId")
 const role=localStorage.getItem("role")
@@ -107,7 +111,6 @@ async function loadTraineeDetails(admainid,traineeid) {
                         <th>Walk Minutes</th>
                         <th>Walk Steps</th>
                         <th>Sleep Hours</th>
-                        <th>Wake Up Hour</th>
                         <th>Caffeine</th>
                         <th>Calories Eaten</th>
                         <th>Calories Burned</th>
@@ -122,7 +125,6 @@ async function loadTraineeDetails(admainid,traineeid) {
                             <td>${d.walk_minutes}</td>
                             <td>${d.walk_steps}</td>
                             <td>${d.sleep_hours}</td>
-                            <td>${d.wake_up_hour}</td>
                             <td>${d.caffeine}</td>
                             <td>${d.calories_eaten}</td>
                             <td>${d.calories_burned}</td>
@@ -130,7 +132,7 @@ async function loadTraineeDetails(admainid,traineeid) {
                                 <button class="deleteDayBtn"
                                     data-trainee="${traineeid}"
                                     data-id="${d.id}">
-                                    Delete
+                                    Delete Day
                                 </button>
                             </td>
                         </tr>
@@ -143,14 +145,13 @@ async function loadTraineeDetails(admainid,traineeid) {
             if (!confirm("Delete this day info?")) return;
     
             const traineeId = btn.dataset.trainee;
-            const id = btn.dataset.id;
+            const dayId  = btn.dataset.id;
     
-            const res = await AdminAPI.deleteTraineeDayInfo(admainid, traineeId, id);
+            const res = await AdminAPI.deleteTraineeDayInfo(admainid, traineeId, dayId);
     
             if (res.data.success) {
                 alert("Deleted day info!");
-                console.log(res);
-               // loadTraineeDetails(admainid, traineeId); // refresh details
+                loadTraineeDetails(admainid, traineeId); // refresh details
             } else {
                 alert("Error deleting day info");
             }

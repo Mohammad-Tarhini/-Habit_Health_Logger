@@ -52,6 +52,7 @@ class AdminController{
 
     public function getTrainee()
     {   error_reporting(E_ERROR | E_PARSE);
+        
         global $connection;
         if (empty($_GET['id'])) {
             echo ResponseService::error("We need the ID");
@@ -85,12 +86,13 @@ class AdminController{
         error_reporting(E_ERROR | E_PARSE);
         $input = json_decode(file_get_contents("php://input"), true);
         $_POST=$input;
-        if (empty($_POST['id'])) {
+        if (empty($_POST['id']) ||empty($_POST['dayId'])) {
             echo ResponseService::error("We need the ID");
             exit;
         }
     
         $id = $_POST['id'];
+        $dayId=$_POST['dayId'];
         $this->autho($connection, $id);
     
         if (!isset($_POST["traineeid"])) {
@@ -99,7 +101,7 @@ class AdminController{
         }
     
         $traineeId = $_POST["traineeid"];
-        $isdelete = AdminService::deleteTrainee($connection, $traineeId);
+        $isdelete = AdminService::deleteTrainee($connection, $traineeId,$dayId);
     
         if ($isdelete) {
             echo ResponseService::success("true");
@@ -138,19 +140,19 @@ class AdminController{
         echo ResponseService::error("Error deleting trainee info");
     }
 
-    // public function updateTraineeDayInfo(){
-    //     global $connection;
-    //     if (empty($_POST['id'])) {
-    //         echo ResponseService::error("We need the ID");
-    //         exit;
-    //     }
+    public function updateTraineeDayInfo(){
+        global $connection;
+        if (empty($_POST['id'])) {
+            echo ResponseService::error("We need the ID");
+            exit;
+        }
  
-    //      $this->autho($connection,$id);
-    //      if(!isset($_POST["traineeid"]) && !isset($_POST["day"])){
-    //        echo ResponseService::error("We need trainee ID  and date");
-    //      }
+         $this->autho($connection,$id);
+         if(!isset($_POST["traineeid"]) && !isset($_POST["day"])){
+           echo ResponseService::error("We need trainee ID  and date");
+         }
 
-    // }
+    }
 
           
 

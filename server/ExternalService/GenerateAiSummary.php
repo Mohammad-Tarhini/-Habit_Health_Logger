@@ -11,7 +11,7 @@ class GenerateAiSummary{
      }
 
 
-   public static function summarizeJsonText($jsonData, $retry = 0, $error = null, $previous = null)
+  public static function summarizeJsonText($jsonData, $retry = 0, $error = null, $previous = null)
 {
     if ($retry > 4) {
         return [
@@ -24,43 +24,68 @@ class GenerateAiSummary{
 
     if ($retry === 0) {
         $instruction = <<<EOD
-Summarize the following weekly data  as you are dietition and also it contain your advices and let the paragraph be very small.
+Summarize the following weekly data as a dietitian. 
+Include short advice and keep it very small.
 
-Return ONLY plain text (no json).
+Return ONLY plain text.
 
 Data:
 $jsonString
 EOD;
     } else {
         $instruction = <<<EOD
-Your previous summary response was invalid.
+Your previous response was invalid.
 
 Error: $error
 Previous AI text:
 $previous
 
-Try again and return ONLY text.
+Try again. Return ONLY plain text.
+
 Data:
 $jsonString
 EOD;
     }
 
-    // Call AI
-    $response = requestOpenAi($instruction);
+    // --- CALL OPENAI ---
+    $result = requestOpenAi($instruction);
 
-    // if (!isset($response['choices'][0]['message']['content'])) {
-    //     return [
-    //         "success" => false,
-    //         "error"   => "Invalid AI response structure"
-    //     ];
-    // }
-    if (is_string($response)) {
-    $response = json_decode($response, true);
-}
+    // If response is a string → decode JSON
+    if (is_string($result)) {
+        $response = json_decode($result, true);
+    } else {
+        $response = $result;
+    }
 
-    $text = $response['choices'][0]['message']['content'];
+    // If failed to decode JSON
+    if ($response === null) {
+        return [
+            "success" => false,
+            "error" => "Failed to decode AI response",
+            "raw" => $result
+        ];
+    }
 
-    // Validate: text should NOT be empty
+    // If API error returned
+    if (isset($response["error"])) {
+        return [
+            "success" => false,
+            "error" => $response["error"]["message"] ?? "Unknown AI error"
+        ];
+    }
+
+    // If AI structure is invalid
+    if (!isset($response["choices"][0]["message"]["content"])) {
+        return [
+            "success" => false,
+            "error" => "AI returned invalid structure",
+            "raw" => $response
+        ];
+    }
+
+    $text = $response["choices"][0]["message"]["content"];
+
+    // Validate summary
     if (strlen(trim($text)) < 5) {
         return self::summarizeJsonText(
             $jsonData,
@@ -75,6 +100,7 @@ EOD;
         "summary" => $text
     ];
 }
+
 
 public static function nutritionCoachCard($jsonData,$jsonMeals, $retry = 0, $error = null, $previous = null)
 {
@@ -147,7 +173,7 @@ EOD;
 }
 
 
- public static function RecieveTextAndsendTextincludesugestion($text, $retry = 0, $error = null, $previous = null)
+public static function RecieveTextAndsendTextincludesugestion($text, $retry = 0, $error = null, $previous = null)
 {
     if ($retry > 4) {
         return [
@@ -156,58 +182,84 @@ EOD;
         ];
     }
 
-   
-
     if ($retry === 0) {
         $instruction = <<<EOD
-give me small paragraph suggest to preservation for her healthy   accordinf to this text 
+Give me a small, simple health advice paragraph for this person based on the following text. 
 
+Return ONLY plain text.
 
-text:
+Text:
 $text
 EOD;
     } else {
         $instruction = <<<EOD
-Your previous paragraph response was invalid.
+Your previous response was invalid.
 
 Error: $error
 Previous AI text:
 $previous
 
-Try again and return ONLY text.
-Data:
+Try again and return ONLY plain text.
+
+Text:
 $text
 EOD;
     }
 
     // Call AI
-    $response = requestOpenAi($instruction);
+    $result = requestOpenAi($instruction);
 
-    if (!isset($response['choices'][0]['message']['content'])) {
+    // Decode JSON
+    if (is_string($result)) {
+        $response = json_decode($result, true);
+    } else {
+        $response = $result;
+    }
+
+    // If decoding failed
+    if ($response === null) {
         return [
             "success" => false,
-            "error"   => "Invalid AI response structure"
+            "error" => "Failed to decode AI response",
+            "raw"   => $result
         ];
     }
 
-    $text = $response['choices'][0]['message']['content'];
+    // If the response contains an error
+    if (isset($response["error"])) {
+        return [
+            "success" => false,
+            "error"   => $response["error"]["message"] ?? "Unknown AI error",
+            "raw" => $response
+        ];
+    }
 
-    // Validate: text should NOT be empty
-    if (strlen(trim($text)) < 5) {
+    // Validate structure
+    if (!isset($response["choices"][0]["message"]["content"])) {
+        return [
+            "success" => false,
+            "error"   => "AI returned invalid structure",
+            "raw"     => $response
+        ];
+    }
+
+    $aiText = $response["choices"][0]["message"]["content"];
+
+    // Ensure text is not empty
+    if (strlen(trim($aiText)) < 5) {
         return self::RecieveTextAndsendTextincludesugestion(
-            $jsonData,
+            $text,
             $retry + 1,
             "AI returned empty summary",
-            $text
+            $aiText
         );
     }
 
     return [
         "success" => true,
-        "summary" => $text
+        "summary" => $aiText
     ];
 }
-
 
 
 }
