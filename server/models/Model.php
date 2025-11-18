@@ -209,6 +209,11 @@ abstract class Model{
     
         return !empty($objects) ? $objects : null;
     }   
+    public static function deleteWhere(mysqli $connection, $table, $column, $value) {
+    $stmt = $connection->prepare("DELETE FROM $table WHERE $column = ?");
+    $stmt->bind_param("i", $value);
+    return $stmt->execute();
+}
 }
 
 ?>

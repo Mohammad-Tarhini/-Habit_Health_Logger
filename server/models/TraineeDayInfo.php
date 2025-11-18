@@ -15,19 +15,24 @@ class TraineeDayInfo extends Model {
 
     protected static string $table = "trainees_days_info";
 
+   
     public function __construct(array $data) {
-        $this->id = $data['id'] ;
-        $this->user_id = $data['user_id'];
-        $this->exercise_minutes = $data['exercise_minutes'] ;
-        $this->walk_minutes = $data['walk_minutes'] ;
-        $this->steps = $data['steps'] ;
-        $this->sleep_hour = $data['sleep_hour'] ;
-
-        $this->caffeine = $data['caffeine'] ?? null;
-        $this->calories_intake = $data['calories_intake'] ;
-        $this->calories_burn = $data['calories_burn'] ;
-       $this->day = new DateTime($data['day']);
+        $this->id = $data['id'] ?? null;
+        $this->user_id = isset($data['user_id']) ? (int)$data['user_id'] : 0;
+    
+        $this->exercise_minutes = isset($data['exercise_minutes']) ? (int)$data['exercise_minutes'] : null;
+        $this->walk_minutes     = isset($data['walk_minutes']) ? (int)$data['walk_minutes'] : null;
+        $this->steps            = isset($data['steps']) ? (int)$data['steps'] : null;
+        $this->sleep_hour       = isset($data['sleep_hour']) ? (float)$data['sleep_hour'] : null;
+    
+        $this->caffeine         = isset($data['caffeine']) ? (int)$data['caffeine'] : null;
+        $this->calories_intake  = isset($data['calories_intake']) ? (int)$data['calories_intake'] : null;
+        $this->calories_burn    = isset($data['calories_burn']) ? (int)$data['calories_burn'] : null;
+    
+        $this->day = isset($data['day']) ? new DateTime($data['day']) : new DateTime();
     }
+
+    
 
     // Getters
     public function getId() { return $this->id; }

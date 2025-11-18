@@ -30,7 +30,7 @@ public static function take_data_from_text_to_database(mysqli $connection, $text
     
 
     //  save daily info
-    if !empty($daysInfo) || !isset($daysInfo['error']) {
+    if (!empty($daysInfo) || !isset($daysInfo['error'])) {
         if(empty($existingDay)){
            
             $daysInfo["day"] = $day;
@@ -94,7 +94,7 @@ public static function take_data_from_text_to_database(mysqli $connection, $text
 }
 
 
-public static function GiveWeeklySummary(mysqli $connection,  $userId,DateTime  $startDate, DateTime  $endDate){
+public static function GiveWeeklySummary(mysqli $connection,  $userId,  $startDate,   $endDate){
     //  $endDate = date('Y-m-d'); // today
     //  $startDate = date('Y-m-d', strtotime('-7 days')); // 7 days ago
     
@@ -116,17 +116,18 @@ public static function GiveWeeklySummary(mysqli $connection,  $userId,DateTime  
             "getCaloriesBurn"=>$day->getCaloriesBurn(),
         ];
     }
-   $summaryResult = GenerateAiSummary::summarizeJsonText($jsonReady);
+   $aiResponse = GenerateAiSummary::summarizeJsonText($jsonReady);
 
-    if (!$summaryResult["success"]) {
-        return ResponseService::error($summaryResult["error"]);
-    }
+    if (!$aiResponse["success"]) {
+    return ResponseService::error($aiResponse["error"] ?? "Failed to generate AI summary");
+}
     
-    return ResponseService::success($summaryResult["summary"]);
+    return ResponseService::success($aiResponse["summary"]);
 
 }
 
 public static function getNutritionCoachCard(mysqli $connection, int $traineeId){
+
     $endDate = date('Y-m-d'); // today
     $startDate = date('Y-m-d', strtotime('-7 days')); // 7 days ago
     $weekData = TraineeDayInfo::findByDateRange($connection, "day", $startDate, $endDate, $traineeId);
@@ -205,7 +206,7 @@ public static function makeSuggestionByAI(mysqli $connection, $text)
         return ResponseService::error("No text provided");
     }
 
-    $result = weeklyAiSummary::RecieveTextAndsendTextincludesugestion($text);
+    $result = GenerateAiSummary::RecieveTextAndsendTextincludesugestion($text);
 
     if (!$result["success"]) {
         return ResponseService::error("Error while generating AI suggestion");

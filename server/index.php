@@ -4,6 +4,8 @@ require_once( __dir__."/routes/api.php");
  require_once (__dir__."/controllers/AdminController.php");
  require_once (__dir__."/controllers/AuthoController.php");
  require_once (__dir__."/controllers/TraineeController.php");
+ require_once(__DIR__.'/utils/config.php');
+
 $base_dir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 $request = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -18,6 +20,8 @@ $apis = [
     // Admin endpoints
     '/admin/getAllTrainees'      => ['controller' => 'AdminController', 'method' => 'getAllTraineesForAdmin'],
     '/admin/getTrainee'          => ['controller' => 'AdminController', 'method' => 'getTrainee'],
+    '/admin/deleteTraine'        =>['controller'=>'AdminController' , 'method'=>'deleteTraine'],
+    '/admin/deleteTraineeInfo'  =>['controller'=>'AdminController' ,'method'=>'deleteTraineeInfo'],
 
     // Auth endpoints
     '/auth/signup'               => ['controller' => 'AuthoController', 'method' => 'signUp'],

@@ -13,11 +13,16 @@ const container = document.getElementById("container");
 const traineeId = localStorage.getItem("userId") || null;
 
 const TraineeAPI = {
-    sendText: (params) => axios.get(BASE_URL + "trainee/entriesAndHabits", { params }),
+    sendText: (data) => axios.post(BASE_URL + "trainee/entriesAndHabits", data),
+
     addHabit: (data) => axios.post(BASE_URL + "trainee/AddHabitsManual", data),
+
     addMeal: (data) => axios.post(BASE_URL + "trainee/addMealsManual", data),
-    weeklySummary: (params) => axios.get(BASE_URL + "trainee/weeklySummary", { params }),
+
+    weeklySummary: (params) => axios.post(BASE_URL + "trainee/weeklySummary", params),
+
     nutritionCard: (params) => axios.get(BASE_URL + "trainee/nutritionCoach", { params }),
+
     getAiSuggestion: (data) => axios.post(BASE_URL + "trainee/TakeSuggestionFromAi", data),
 };
 
@@ -86,13 +91,16 @@ function attachEvents() {
     const sendTextBtn = document.getElementById("sendTextBtn");
     if (sendTextBtn) {
         sendTextBtn.addEventListener("click", async () => {
-            const dayDate = document.getElementById("dayDate").value;
-            const text = document.getElementById("text").value;
-            const aiResponse = document.getElementById("aiResponse");
+                const payload = {
+                    id: traineeId,
+                    dayDate: document.getElementById("dayDate").value,
+                    text: document.getElementById("text").value
+                };
 
             aiResponse.innerText = "Saving...";
             try {
-                const res = await TraineeAPI.sendText({ id: traineeId, dayDate, text });
+                const res =await TraineeAPI.sendText(payload);
+                console.log(res);
                 aiResponse.innerText = res.data.success ? "Entries saved!" : (res.data.message || "No response");
             } catch (err) {
                 aiResponse.innerText = "Error: " + (err?.response?.data?.message || err.message || "Unknown");
@@ -120,6 +128,7 @@ function attachEvents() {
             habitResponse.innerText = "Saving...";
             try {
                 const res = await TraineeAPI.addHabit(data);
+                console.log(res);
                 habitResponse.innerText = res.data.success ? res.data.data : (res.data.message || "No response");
             } catch (err) {
                 habitResponse.innerText = "Error: " + (err?.response?.data?.message || err.message || "Unknown");
@@ -162,6 +171,7 @@ function attachEvents() {
             weeklySummary.innerText = "Loading...";
             try {
                 const res = await TraineeAPI.weeklySummary(data);
+                console.log(res);
                 weeklySummary.innerText = res.data.success ? JSON.stringify(res.data.data, null, 2) : (res.data.message || "No response");
             } catch (err) {
                 weeklySummary.innerText = "Error: " + (err?.response?.data?.message || err.message || "Unknown");
@@ -177,6 +187,7 @@ function attachEvents() {
             nutritionCard.innerText = "Loading...";
             try {
                 const res = await TraineeAPI.nutritionCard({ id: traineeId });
+               
                 nutritionCard.innerText = res.data.success ? JSON.stringify(res.data.data, null, 2) : (res.data.message || "No response");
             } catch (err) {
                 nutritionCard.innerText = "Error: " + (err?.response?.data?.message || err.message || "Unknown");
@@ -199,6 +210,7 @@ function attachEvents() {
             suggestionResponse.innerText = "Loading...";
             try {
                 const res = await TraineeAPI.getAiSuggestion({ id: traineeId, text });
+                console.log(res)
                 suggestionResponse.innerText = res.data.success ? res.data.data : (res.data.message || "No response");
             } catch (err) {
                 suggestionResponse.innerText = "Error: " + (err?.response?.data?.message || err.message || "Unknown");

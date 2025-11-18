@@ -24,7 +24,13 @@ export function showSignin() {
 
         try {
             const res = await AuthAPI.signin(data);
-
+            console.log(res);
+           if(!res.data.success){
+            document.getElementById("email").value="";
+            document.getElementById("password").value="";
+            document.getElementById("role").value="";
+            alert(res.data.message);
+           }
             
 
             if (res.data.success) {
